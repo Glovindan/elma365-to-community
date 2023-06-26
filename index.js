@@ -1,3 +1,8 @@
+/**
+ * 
+ * Стартовый файл
+ * 
+ */
 var XLSX = require("xlsx");
 
 const {getElementDataById, getUserDataById, getDownloadFileDataByHash, getFileDataByFileId} = require('./elmaApi')
@@ -5,7 +10,10 @@ const {addThread, uploadFile} = require('./communityApi')
 const excelToJson = require('convert-excel-to-json');
 const { log } = require("console");
 
-/** Переформатирование текста из ELMA в коммьюнити */
+/** Переформатирование текста из ELMA в коммьюнити
+  * @param {string} text Описание файла из Elma365
+  * @returns {string} Переформатированная строка
+  */
 const reformatDescription = (text) => {
   /** Замена кавычек на форматирование [CODE][/CODE] */
   let description = text;
@@ -51,7 +59,11 @@ const reformatDescription = (text) => {
   return description;
 }
 
-/** Получение кода раздела (html) через место применения и место написания скрипта */
+/** Получение кода раздела (html) через место применения и место написания скрипта 
+  * @param {string[]} applicationArea Коды областей применения элемента quick из Elma365
+  * @param {string[]} scriptsWritten Коды мест написания скриптов элемента quick и Elma365
+  * @returns {string} Идентификатор раздела
+  */
 const getSectionByData = (applicationArea, scriptsWritten) => {
   if((scriptsWritten && scriptsWritten.find(sw => sw === "putty")) || (applicationArea && applicationArea.find(aa => aa === "servera" || aa === "microservice"))) {
     return 'on-premises-solutions'
@@ -64,7 +76,10 @@ const getSectionByData = (applicationArea, scriptsWritten) => {
   return 'script-examples'
 }
 
-/** Запуск переноса */
+/** Запуск переноса 
+  * @param {any} jsonTable Входящая таблицац xlsx
+  * @returns {Promise<any>} Таблица xlsx с результатом
+  */
 const start = async(jsonTable) => {
   for(const element of jsonTable) {
     if(element.B !== "Community") {
