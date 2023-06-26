@@ -18,7 +18,7 @@ const reformatDescription = (text) => {
     let regex = new RegExp(quotes + '\n([\\S\\s]+?)\n' + quotes);
     const matchRes = description.match(regex);
     
-    // Если не найдено - заменить на [CODE] и выйти из цикла
+    // Если не найдено - заменить на [CODE] до конца строки и выйти из цикла
     if(!matchRes) {
       if(quotes) {
         description = description.replace(quotes+"\n", "[CODE]")
@@ -33,9 +33,8 @@ const reformatDescription = (text) => {
   } while(quotes)
   
   /** TODO: Замена ``text`` и `text` на <span style="font-family: 'Courier New'">text</span> */
-  /** Замена пробелов перед символами */
     
-  /** Перенос строк в html */
+  /** Формирование html из строки */
   const regexHtml = /^(.+?)$/gm;
   const matchResHtml = description.matchAll(regexHtml);
 
@@ -52,6 +51,7 @@ const reformatDescription = (text) => {
   return description;
 }
 
+/** Получение кода раздела (html) через место применения и место написания скрипта */
 const getSectionByData = (applicationArea, scriptsWritten) => {
   if((scriptsWritten && scriptsWritten.find(sw => sw === "putty")) || (applicationArea && applicationArea.find(aa => aa === "servera" || aa === "microservice"))) {
     return 'on-premises-solutions'
@@ -64,7 +64,7 @@ const getSectionByData = (applicationArea, scriptsWritten) => {
   return 'script-examples'
 }
 
-//TODO: Маршрутизация по категориям
+/** Запуск переноса */
 const start = async(jsonTable) => {
   for(const element of jsonTable) {
     if(element.B !== "Community") {
@@ -76,9 +76,11 @@ const start = async(jsonTable) => {
     // const elementId = 'b30a86b5-9d28-417f-b2a8-c7671cd0eb09';
     const getRes = await getElementDataById(elementId)
     const data = getRes.result[0];
+
     console.log("-------ДАННЫЕ ИЗ ЭЛМЫ--------");
     console.log(data);
     log();
+
     const description = reformatDescription(data.opisanie);
     
     const allTags = data.all_tags;
@@ -109,6 +111,7 @@ const start = async(jsonTable) => {
 
         // Выгрузка файла в community
         const response = await uploadFile(fileName, fileContent, uploadHash, section);
+
         log("-------РЕЗУЛЬТАТ ВЫГРУЗКИ---------");
         log(response);
         log();
@@ -119,7 +122,8 @@ const start = async(jsonTable) => {
         }
       }
     }
-
+    
+    // Если произошла ошибка при переносе - пропустить статью и записать в таблицу
     if(isUploadFailed) {
       element.E = "Ошибка переноса";
       continue;
